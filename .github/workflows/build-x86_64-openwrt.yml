@@ -17,10 +17,10 @@ on:
 #    types: started
 
 env:
-  REPO_URL: https://github.com/immortalwrt/immortalwrt
-  REPO_BRANCH: openwrt-18.06
+  REPO_URL: https://github.com/coolsnowwolf/lede
+  REPO_BRANCH: master
   CONFIG_FILE: config/x86/x86_64-openwrt-target.config
-  DIY_SH: scripts/project-openwrt.sh
+  DIY_SH: scripts/project-lede.sh
   WEBROOT: /www/wwwroot/opup.link
   RUNNER: project-x86_64
 
@@ -63,7 +63,7 @@ jobs:
           mkdir -p openwrt
           sudo mount ${LOOP}p1 openwrt
           lsblk
-          sudo chown -R suling:suling openwrt
+          sudo chown -R openwrt:openwrt openwrt
           cd openwrt
           echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
 
@@ -72,14 +72,18 @@ jobs:
         run: |
           df -hT $PWD
           git clone --depth 1 $REPO_URL -b $REPO_BRANCH
-          mv immortalwrt/* openwrt
-          mv immortalwrt/.git* openwrt
+          mv lede/* openwrt
+          mv lede/.git* openwrt
 
       - name: Update Feeds
         id: update
         run: |
           cd $OPENWRTROOT
-          ./scripts/feeds update -a
+          mkdir customfeeds
+          git clone --depth=1 https://github.com/coolsnowwolf/packages customfeeds/packages
+          git clone --depth=1 https://github.com/coolsnowwolf/luci customfeeds/luci
+          chmod +x ../scripts/*.sh
+          ../scripts/hook-feeds.sh
 
       - name: Install Feeds
         id: install
@@ -91,7 +95,6 @@ jobs:
         run: |
           [ -e files ] && mv files $OPENWRTROOT/files
           cd $OPENWRTROOT
-          chmod +x ../scripts/*.sh
           ../$DIY_SH
 
       - name: Download All Packages
@@ -100,7 +103,7 @@ jobs:
           cd $OPENWRTROOT
           wget -q https://raw.githubusercontent.com/openwrt/openwrt/master/scripts/download.pl -O scripts/download.pl
           rm -rf dl
-          cp -r /data/cache/4.19/dl .
+          cp -r ~/cache/lean/dl .
           echo "CONFIG_ALL=y" >> .config
           make defconfig
           make download -j16 IGNORE_ERRORS=1

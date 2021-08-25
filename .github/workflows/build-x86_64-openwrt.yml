@@ -130,22 +130,6 @@ jobs:
           make toolchain/compile -j$(nproc) BUILD_LOG=1 || make toolchain/compile -j1 V=s
           echo "::set-output name=TOOLCHAIN_STATUS::success"
 
-      - name: Collect Logs
-        id: toolchain-logs-collect
-        if: always()
-        run: |
-          cd $OPENWRTROOT
-          mkdir -p output/logs
-          mv logs output/logs/${{ github.job }}
-
-      - name: Upload Logs
-        id: toolchain-logs-upload
-        if: always()
-        uses: actions/upload-artifact@main
-        with:
-          name: Logs-${{ github.job }}
-          path: openwrt/output/logs/${{ github.job }}
-
       - name: Umount Disk Image
         id: prepare
         if: always()
@@ -188,7 +172,6 @@ jobs:
         run: |
           cd $OPENWRTROOT
           echo -e "$(nproc) threads compile"
-          echo '# CONFIG_IR_ENE is not set' >> target/linux/x86/64/config-5.4
           make target/compile -j$(nproc) 'IGNORE_ERRORS=n m' BUILD_LOG=1 || make target/compile -j1 V=s IGNORE_ERRORS=1
           make diffconfig
           make package/compile -j$(nproc) 'IGNORE_ERRORS=n m' BUILD_LOG=1 || make package/compile -j1 V=s
@@ -220,33 +203,16 @@ jobs:
           cd $OPENWRTROOT
           mkdir -p files/etc/opkg
           cp ../data/opkg/distfeeds.conf files/etc/opkg/distfeeds.conf
-          mkdir -p files/www/snapshots
-          cp -r bin/targets files/www/snapshots
+          mkdir -p files/www/releases
+          cp -r bin/targets files/www/releases
           mkdir -p files/etc/uci-defaults/
           cp ../scripts/init-settings.sh files/etc/uci-defaults/99-init-settings
-          mkdir -p files/bin
-          cp ../scripts/ipv6-helper.sh files/bin/ipv6-helper
           make package/install || make package/install -j1 V=s
           make target/install || make target/install -j1 V=s
           make checksum
           mkdir -p $OPENWRTROOT/output/bin/targets/$TARGET
           cp -r $FIRMWARE $OPENWRTROOT/output/bin/targets/$TARGET
           echo "::set-output name=GENERATE_STATUS::success"
-
-      - name: Collect Logs
-        id: firmware-logs-collect
-        if: always()
-        run: |
-          cd $OPENWRTROOT
-          mv logs output/logs/${{ github.job }}
-
-      - name: Upload Logs
-        id: firmware-logs-upload
-        if: always()
-        uses: actions/upload-artifact@main
-        with:
-          name: Logs-${{ github.job }}
-          path: openwrt/output/logs/${{ github.job }}
 
       - name: Umount Disk Image
         if: always()
@@ -282,7 +248,7 @@ jobs:
           mkdir -p openwrt
           sudo mount ${LOOP}p1 openwrt
           lsblk
-          sudo chown -R suling:suling openwrt
+          sudo chown -R openwrt:openwrt openwrt
           cd openwrt
           echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
 
@@ -307,14 +273,6 @@ jobs:
           cp -r bin/packages/$PLATFORM $OPENWRTROOT/output/bin/packages
           echo "::set-output name=COMPILE_STATUS::success"
 
-      - name: Collect Logs
-        id: packages-logs-collect
-        if: always()
-        run: |
-          cd $OPENWRTROOT
-          mv logs output/logs/${{ github.job }}
-          [ -e output/bin/targets/$TARGET/$SUBTARGET ] && cp -r output/logs output/bin/targets/$TARGET/$SUBTARGET
-
       - name: Compress Bin Folder
         if: steps.compile.outputs.COMPILE_STATUS == 'success'
         id: compress
@@ -329,14 +287,6 @@ jobs:
         with:
           name: Bin-Archive
           path: openwrt/output
-
-      - name: Upload Logs
-        id: packages-logs-upload
-        if: always()
-        uses: actions/upload-artifact@main
-        with:
-          name: Logs-${{ github.job }}
-          path: openwrt/output/logs/${{ github.job }}
 
       - name: Umount Disk Image
         if: always()
@@ -384,8 +334,8 @@ jobs:
           HOST: "${{ secrets.REMOTE_USER }}@${{ secrets.PACIFICRACK_IP }}"
           SOURCE_TARGETS: "openwrt/bin/targets/${{ env.TARGET }}/${{ env.SUBTARGET }}/"
           SOURCE_PACKAGES: "openwrt/bin/packages/${{ env.PLATFORM }}/"
-          DEST_TARGETS: "${{ env.WEBROOT }}/snapshots/targets/${{ env.TARGET }}/${{ env.SUBTARGET }}/"
-          DEST_PACKAGES: "${{ env.WEBROOT }}/snapshots/packages/${{ env.PLATFORM }}/"
+          DEST_TARGETS: "${{ env.WEBROOT }}/releases/targets/${{ env.TARGET }}/${{ env.SUBTARGET }}/"
+          DEST_PACKAGES: "${{ env.WEBROOT }}/releases/packages/${{ env.PLATFORM }}/"
           REMOTE_PRIVATEKEY: "${{secrets.PACIFICRACK_PRIVATEKEY}}"
         if: env.REMOTE_PRIVATEKEY != null
         run: |
@@ -394,7 +344,7 @@ jobs:
           echo "${{secrets.PACIFICRACK_PRIVATEKEY}}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh -q -t -i ~/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $HOST \
-          bash -c "'mkdir -p $WEBROOT/snapshots/targets/$TARGET/$SUBTARGET \
-          $WEBROOT/snapshots/packages/$PLATFORM'"
+          bash -c "'mkdir -p $WEBROOT/releases/targets/$TARGET/$SUBTARGET \
+          $WEBROOT/releases/packages/$PLATFORM'"
           rsync -chavP --delete -e 'ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no' $SOURCE_TARGETS $HOST:$DEST_TARGETS
           rsync -chavP --delete -e 'ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no' $SOURCE_PACKAGES $HOST:$DEST_PACKAGES

@@ -63,7 +63,7 @@ jobs:
           mkdir -p openwrt
           sudo mount ${LOOP}p1 openwrt
           lsblk
-          sudo chown -R openwrt:openwrt openwrt
+          sudo chown -R suling:suling openwrt
           cd openwrt
           echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
 
@@ -160,7 +160,7 @@ jobs:
           mkdir -p openwrt
           sudo mount ${LOOP}p1 openwrt
           lsblk
-          sudo chown -R openwrt:openwrt openwrt
+          sudo chown -R suling:suling openwrt
           cd openwrt
           echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
 
@@ -249,7 +249,7 @@ jobs:
           mkdir -p openwrt
           sudo mount ${LOOP}p1 openwrt
           lsblk
-          sudo chown -R openwrt:openwrt openwrt
+          sudo chown -R suling:suling openwrt
           cd openwrt
           echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
 

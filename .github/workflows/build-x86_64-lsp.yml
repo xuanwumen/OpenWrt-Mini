@@ -241,7 +241,7 @@ jobs:
 
   Upload:
     if: needs.Extra-Packages.outputs.COMPILE_STATUS == 'success'
-    needs: [Extra-Packages, Firmware]
+    needs: [Firmware]
     runs-on: ubuntu-18.04
 
     steps:

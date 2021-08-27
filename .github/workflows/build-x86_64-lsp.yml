@@ -240,7 +240,7 @@ jobs:
           lsblk
 
   Upload:
-    if: needs.Extra-Packages.outputs.COMPILE_STATUS == 'success'
+    if: needs.Firmware.outputs.COMPILE_STATUS == 'success'
     needs: [Firmware]
     runs-on: ubuntu-18.04
 

@@ -220,7 +220,7 @@ jobs:
         id: compress
         run: |
           cd $OPENWRTROOT/output
-          zip -q -s 500m -r bin-archive.zip bin
+          zip -q -r bin-archive.zip bin
           rm -rf bin
 
       - name: Upload Bin Archive
@@ -265,8 +265,9 @@ jobs:
           sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
           cd openwrt
           echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
-          zip -q -s 0 bin-archive.zip --out bin.zip
-          unzip bin.zip
+          unzip bin-archive.zip
+          mv bin-archive/* .
+          rm -rf bin-archive
           cd bin/targets/$TARGET/$SUBTARGET
           echo "FIRMWARE=$PWD" >> $GITHUB_ENV
 

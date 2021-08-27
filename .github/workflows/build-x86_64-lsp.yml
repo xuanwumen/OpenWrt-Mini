@@ -212,7 +212,7 @@ jobs:
           make checksum
           mkdir -p $OPENWRTROOT/output/bin/targets/$TARGET
           cp -r $FIRMWARE $OPENWRTROOT/output/bin/targets/$TARGET
-          rm -rf $OPENWRTROOT/output/bin/targets/$TARGET/packages
+          rm -rf $OPENWRTROOT/output/bin/targets/$PLATFORM/$TARGET/packages
           echo "::set-output name=GENERATE_STATUS::success"
 
       - name: Compress Bin Folder

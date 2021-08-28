@@ -210,9 +210,9 @@ jobs:
           make package/install || make package/install -j1 V=s
           make target/install || make target/install -j1 V=s
           make checksum
+          rm -rf $OPENWRTROOT/bin/targets/$TARGET/$SUBTARGET/packages
           mkdir -p $OPENWRTROOT/output/bin/targets/$TARGET
           cp -r $FIRMWARE $OPENWRTROOT/output/bin/targets/$TARGET
-          rm -rf $OPENWRTROOT/output/bin/targets/$PLATFORM/$TARGET/packages
           echo "::set-output name=GENERATE_STATUS::success"
 
       - name: Compress Bin Folder
@@ -220,7 +220,7 @@ jobs:
         id: compress
         run: |
           cd $OPENWRTROOT/output
-          zip -q -r bin-archive.zip bin
+          zip -q -s 500m -r bin-archive.zip bin
           rm -rf bin
 
       - name: Upload Bin Archive
@@ -264,7 +264,9 @@ jobs:
         run: |
           sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
           cd openwrt
-          rm -rf bin-archive
+          echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
+          zip -q -s 0 bin-archive.zip --out bin.zip
+          unzip bin.zip
           cd bin/targets/$TARGET/$SUBTARGET
           echo "FIRMWARE=$PWD" >> $GITHUB_ENV
 

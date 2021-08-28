@@ -264,9 +264,6 @@ jobs:
         run: |
           sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
           cd openwrt
-          echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
-          unzip bin-archive.zip
-          mv bin-archive/* .
           rm -rf bin-archive
           cd bin/targets/$TARGET/$SUBTARGET
           echo "FIRMWARE=$PWD" >> $GITHUB_ENV

@@ -216,7 +216,7 @@ jobs:
           echo "::set-output name=GENERATE_STATUS::success"
 
       - name: Compress Bin Folder
-        if: steps.compile.outputs.GENERATE_STATUS == 'success'
+        if: steps.generate.outputs.GENERATE_STATUS == 'success'
         id: compress
         run: |
           cd $OPENWRTROOT/output

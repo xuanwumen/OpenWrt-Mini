@@ -12,10 +12,14 @@ git clone --depth=1 https://github.com/immortalwrt/packages -b openwrt-18.06 tem
 git clone --depth=1 https://github.com/immortalwrt/luci -b openwrt-18.06 temp/luci
 
 # Add luci-app-adguardhome
+rm -rf packages/net/adguardhome
 cp -r temp/luci/applications/luci-app-adguardhome luci/applications/luci-app-adguardhome
-# cp -r temp/packages/net/adguardhome packages/net/adguardhome
+cp -r temp/packages/net/adguardhome packages/net/adguardhome
 # cp -r temp/packages/lang/node-yarn packages/lang/node-yarn
 # cp -r temp/packages/devel/packr packages/devel/packr
+
+# Add luci-app-dockerman
+cp -r temp/luci/applications/luci-app-dockerman luci/applications/luci-app-dockerman
 
 # Add luci-app-gowebdav
 cp -r temp/luci/applications/luci-app-gowebdav luci/applications/luci-app-gowebdav

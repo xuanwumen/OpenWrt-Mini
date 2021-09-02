@@ -206,7 +206,7 @@ jobs:
           mkdir -p files/www/releases
           cp -r bin/targets files/www/releases
           mkdir -p files/etc/uci-defaults/
-          cp ../scripts/init-settings.sh files/etc/uci-defaults/99-init-settings
+          cp ../scripts/init-lsp-settings.sh files/etc/uci-defaults/99-init-settings
           make package/install || make package/install -j1 V=s
           make target/install || make target/install -j1 V=s
           make checksum

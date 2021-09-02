@@ -13,8 +13,8 @@ uci set luci.main.mediaurlbase='/luci-static/argon'
 sed -i 's/option check_signature/# option check_signature/g' /etc/opkg.conf
 
 # Disable autostart by default for some packages
-cd /etc/rc.d
-rm -f S98udptools || true
+# cd /etc/rc.d
+# rm -f S98udptools || true
 
 # Add build date to index page
 sed -i '/DISTRIB_REVISION/d' /etc/openwrt_release 

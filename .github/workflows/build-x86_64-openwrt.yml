@@ -12,7 +12,7 @@ on:
   repository_dispatch:
   workflow_dispatch:
   schedule:
-    - cron: 0 9 * * 2,4,6
+    - cron: 0 19 * * SAT
 #  watch:
 #    types: started
 
@@ -22,11 +22,11 @@ env:
   CONFIG_FILE: config/x86/x86_64-openwrt-target.config
   DIY_SH: scripts/project-lede.sh
   WEBROOT: /www/wwwroot/opup.link
-  RUNNER: project-x86_64
+  RUNNER: project-lede
 
 jobs:
   Toolchain:
-    runs-on: project-x86_64
+    runs-on: project-lede
 
     outputs:
       TOOLCHAIN_STATUS: ${{ steps.toolchain.outputs.TOOLCHAIN_STATUS }}
@@ -142,7 +142,7 @@ jobs:
   Firmware:
     if: needs.Toolchain.outputs.TOOLCHAIN_STATUS == 'success'
     needs: [Toolchain]
-    runs-on: project-x86_64
+    runs-on: project-lede
 
     outputs:
       PLATFORM: ${{ steps.compile.outputs.PLATFORM }}
@@ -227,7 +227,7 @@ jobs:
   Extra-Packages:
     if: needs.Firmware.outputs.GENERATE_STATUS == 'success'
     needs: [Firmware]
-    runs-on: project-x86_64
+    runs-on: project-lede
 
     outputs:
       COMPILE_STATUS: ${{ steps.compile.outputs.COMPILE_STATUS }}
@@ -335,8 +335,8 @@ jobs:
           HOST: "${{ secrets.REMOTE_USER }}@${{ secrets.PACIFICRACK_IP }}"
           SOURCE_TARGETS: "openwrt/bin/targets/${{ env.TARGET }}/${{ env.SUBTARGET }}/"
           SOURCE_PACKAGES: "openwrt/bin/packages/${{ env.PLATFORM }}/"
-          DEST_TARGETS: "${{ env.WEBROOT }}/releases/targets/${{ env.TARGET }}/${{ env.SUBTARGET }}/"
-          DEST_PACKAGES: "${{ env.WEBROOT }}/releases/packages/${{ env.PLATFORM }}/"
+          DEST_TARGETS: "${{ env.WEBROOT }}/test/targets/${{ env.TARGET }}/${{ env.SUBTARGET }}/"
+          DEST_PACKAGES: "${{ env.WEBROOT }}/test/packages/${{ env.PLATFORM }}/"
           REMOTE_PRIVATEKEY: "${{secrets.PACIFICRACK_PRIVATEKEY}}"
         if: env.REMOTE_PRIVATEKEY != null
         run: |
@@ -345,7 +345,7 @@ jobs:
           echo "${{secrets.PACIFICRACK_PRIVATEKEY}}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh -q -t -i ~/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $HOST \
-          bash -c "'mkdir -p $WEBROOT/releases/targets/$TARGET/$SUBTARGET \
-          $WEBROOT/releases/packages/$PLATFORM'"
+          bash -c "'mkdir -p $WEBROOT/test/targets/$TARGET/$SUBTARGET \
+          $WEBROOT/test/packages/$PLATFORM'"
           rsync -chavP --delete -e 'ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no' $SOURCE_TARGETS $HOST:$DEST_TARGETS
           rsync -chavP --delete -e 'ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no' $SOURCE_PACKAGES $HOST:$DEST_PACKAGES
